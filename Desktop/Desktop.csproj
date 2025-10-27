@@ -1,0 +1,179 @@
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0C97C978-BCC4-46A5-86D1-D2F45ECA7C92}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Rent</RootNamespace>
+    <AssemblyName>Rent_Desktop</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>1107242.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.CodeParser.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Data.Desktop.v25.1" />
+    <Reference Include="DevExpress.Data.v25.1" />
+    <Reference Include="DevExpress.DataAccess.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Office.v25.1.Core, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.RichEdit.v25.1.Core, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Utils.v25.1" />
+    <Reference Include="DevExpress.Sparkline.v25.1.Core" />
+    <Reference Include="DevExpress.Xpo.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraBars.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v25.1" />
+    <Reference Include="DevExpress.Printing.v25.1.Core" />
+    <Reference Include="DevExpress.Drawing.v25.1" />
+    <Reference Include="DevExpress.XtraGrid.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v25.1, Version=25.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="SkinKsoft">
+      <HintPath>..\..\..\..\..\..\tools\HelperDLLs\SkinKsoft.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Text.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BachelorPad.cs" />
+    <Compile Include="DetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DetailForm.Designer.cs">
+      <DependentUpon>DetailForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Home.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Home.Designer.cs">
+      <DependentUpon>Home.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyLibrary\Application.cs" />
+    <Compile Include="MyLibrary\DataBase.cs" />
+    <Compile Include="MyLibrary\DataTable.cs" />
+    <Compile Include="MyLibrary\Date.cs" />
+    <Compile Include="MyLibrary\File.cs" />
+    <Compile Include="MyLibrary\Helpers.cs" />
+    <Compile Include="MyLibrary\MsSqlConnectionString.cs" />
+    <Compile Include="MyLibrary\MyAttribute.cs" />
+    <Compile Include="MyLibrary\Session.cs" />
+    <Compile Include="MyLibrary\String.cs" />
+    <Compile Include="MyLibrary\WinForms\Controls\ComboBoxClass.cs" />
+    <Compile Include="MyLibrary\WinForms\Controls\ControlClass.cs" />
+    <Compile Include="MyLibrary\WinForms\Controls\Forms\ButtonsXtraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Controls\Forms\ButtonsXtraForm.Designer.cs">
+      <DependentUpon>ButtonsXtraForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Controls\Forms\LayoutXtraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Controls\Forms\LayoutXtraForm.Designer.cs">
+      <DependentUpon>LayoutXtraForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Controls\Forms\MyXtraForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Controls\GridClass.cs" />
+    <Compile Include="MyLibrary\WinForms\Controls\LayoutControlGroupClass.cs" />
+    <Compile Include="MyLibrary\WinForms\LoadingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\LoadingForm.Designer.cs">
+      <DependentUpon>LoadingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyLibrary\WinForms\Message.cs" />
+    <Compile Include="MyLibrary\WinForms\WinHelpers.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DetailForm.resx">
+      <DependentUpon>DetailForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Home.resx">
+      <DependentUpon>Home.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyLibrary\WinForms\Controls\Forms\ButtonsXtraForm.resx">
+      <DependentUpon>ButtonsXtraForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyLibrary\WinForms\Controls\Forms\LayoutXtraForm.resx">
+      <DependentUpon>LayoutXtraForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyLibrary\WinForms\Controls\Forms\MyXtraForm.resx">
+      <DependentUpon>MyXtraForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyLibrary\WinForms\LoadingForm.resx">
+      <DependentUpon>LoadingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="App.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="1107242.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
