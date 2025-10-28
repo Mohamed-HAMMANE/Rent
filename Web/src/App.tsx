@@ -85,7 +85,7 @@ type SortField =
   | 'quality'
   | 'recent';
 
-const SORT_OPTIONS: Array<{ value: SortField; label: string }> = [
+export const SORT_OPTIONS: Array<{ value: SortField; label: string }> = [
   { value: 'mark-desc', label: 'Mark (high → low)' },
   { value: 'mark-asc', label: 'Mark (low → high)' },
   { value: 'price-asc', label: 'Price (low → high)' },
@@ -234,48 +234,47 @@ function App() {
       <header className="page-header">
         <div className="page-header__left">
           <h1>Apartment shortlist</h1>
+          <div className="header-controls" role="region" aria-label="List controls">
+            <label className="list-controls__label" htmlFor="sort-field">Sort by</label>
+            <select
+              id="sort-field"
+              className="list-controls__select"
+              value={sortField}
+              onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                setSortField(event.target.value as SortField)
+              }
+            >
+              {SORT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="summary-bar summary-bar--inline">
-          <div className="summary-item">
-            <span className="summary-label">Tracked</span>
-            <strong>{summary.count}</strong>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">Top mark</span>
-            <strong>
-              {summary.topMark !== null ? summary.topMark.toFixed(2) : '-'}
-            </strong>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">Average rent</span>
-            <strong>
-              {summary.averageRent !== null
-                ? PRICE_CURRENCY_FORMATTER.format(summary.averageRent)
-                : '-'}
-            </strong>
+        <div className="page-header__right">
+          <div className="summary-bar summary-bar--inline">
+            <div className="summary-item">
+              <span className="summary-label">Tracked</span>
+              <strong>{summary.count}</strong>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Top mark</span>
+              <strong>
+                {summary.topMark !== null ? summary.topMark.toFixed(2) : '-'}
+              </strong>
+            </div>
+            <div className="summary-item">
+              <span className="summary-label">Average rent</span>
+              <strong>
+                {summary.averageRent !== null
+                  ? PRICE_CURRENCY_FORMATTER.format(summary.averageRent)
+                  : '-'}
+              </strong>
+            </div>
           </div>
         </div>
       </header>
-      <div className="list-controls" role="region" aria-label="List controls">
-        <label className="list-controls__label" htmlFor="sort-field">
-          Sort by
-        </label>
-        <select
-          id="sort-field"
-          className="list-controls__select"
-          value={sortField}
-          onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-            setSortField(event.target.value as SortField)
-          }
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <span className="list-controls__note">All prices in MAD</span>
-      </div>
       {error && (
         <div className="banner banner--error" role="alert">
           {error}

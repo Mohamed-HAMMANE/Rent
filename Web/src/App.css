@@ -40,6 +40,9 @@
   letter-spacing: -0.01em;
 }
 
+.page-header__right { display: inline-flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.header-controls { display: inline-flex; align-items: center; gap: 0.5rem; }
+
 .summary-bar {
   display: inline-flex;
   align-items: center;
@@ -435,14 +438,14 @@
 @media (max-width: 720px) {
   .apartment-thumb { height: 160px !important; }
 }
-.spec-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; }
+.spec-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; }
 
 /* Spec row: force single row of four compact chips */
 .spec-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; align-items: stretch; }
 .spec { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.15rem; padding: 3px 6px; min-width: 0; }
 .spec-icon { width: 0.9rem; height: 0.9rem; }
 .spec-value { font-size: 0.85rem; line-height: 1; }
-.spec-label { font-size: 0.6rem; letter-spacing: 0.07em; }
+.spec-label { font-size: 0.5rem; letter-spacing: 0.07em; }
 
 @media (max-width: 560px) {
   .spec-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -455,3 +458,9 @@
 .thumb-chat { position: absolute; top: 8px; left: 8px; width: 28px; height: 28px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.92); color: #4c1d95; border: 1px solid var(--border-color); box-shadow: 0 6px 14px rgba(2,6,23,.15); }
 .thumb-chat svg { width: 14px; height: 14px; }
 .thumb-chat:hover { background: #ede9fe; }
+
+/* 4-column desktop test */
+@media (min-width: 1200px) {
+  .page { width: min(1280px, 100%); }
+  .apartment-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
