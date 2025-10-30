@@ -84,14 +84,14 @@ const RATING_FIELDS: Array<{
   },
 ];
 
-const PRICE_CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+const PRICE_CURRENCY_FORMATTER = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'MAD',
   currencyDisplay: 'code',
   maximumFractionDigits: 0,
 });
 
-const PRICE_VALUE_FORMATTER = new Intl.NumberFormat('en-US', {
+const PRICE_VALUE_FORMATTER = new Intl.NumberFormat('fr-FR', {
   maximumFractionDigits: 0,
 });
 
@@ -404,6 +404,7 @@ function App() {
                       : 'N/A'}
                   </span>
                   <span className="thumb-address">{displayName}</span>
+                  <span className={`status-pill status-pill--${apartment.status ?? "Available"}`}>{apartment.status ?? "Available"}</span>
                   <span className="thumb-price text-mono">
                     {PRICE_VALUE_FORMATTER.format(apartment.price)} MAD
                   </span>
@@ -553,6 +554,8 @@ function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpda
 }
 
 export default App;
+
+
 
 
 
