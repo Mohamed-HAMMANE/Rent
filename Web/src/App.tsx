@@ -1,4 +1,4 @@
-import { useMemo, useRef, useCallback, useState } from 'react';
+import { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import type { ReactNode, KeyboardEvent, ChangeEvent } from 'react';
 import './App.css';
 import { API_BASE_URL, updateBachelorPadStatus } from './api';
@@ -172,12 +172,23 @@ function App() {
   const { apartments, loading, error, refresh } = useBachelorPads();
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const [sortField, setSortField] = useState<SortField>('mark-desc');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('Available');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
+    try {
+      const saved = localStorage.getItem('statusFilter') as StatusFilter | null;
+      return saved ?? 'Available';
+    } catch {
+      return 'Available';
+    }
+  });
 
   const filteredApartments = useMemo(() => {
     if (statusFilter === 'all') return apartments;
     return apartments.filter((a) => (a.status ?? 'Available') === statusFilter);
   }, [apartments, statusFilter]);
+  // Persist status filter
+  useEffect(() => {
+    try { localStorage.setItem('statusFilter', statusFilter); } catch {}
+  }, [statusFilter]);
 
   const statusCounts = useMemo(() => {
     const counts: Record<ApartmentStatus, number> = {
@@ -288,7 +299,7 @@ function App() {
               <label className="list-controls__label" htmlFor="status-filter">Status</label>
               <select
                 id="status-filter"
-                className="list-controls__select"
+                className={`list-controls__select${statusFilter !== "all" ? " list-controls__select--bold" : ""}`}
                 value={statusFilter}
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as StatusFilter)}
               >
@@ -440,11 +451,35 @@ function App() {
 
 
 function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpdated: () => void }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [status, setStatus] = useState<ApartmentStatus>(apartment.status ?? 'Available');
   const [observation, setObservation] = useState<string>(apartment.observation ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialStatus = apartment.status ?? 'Available';
+  const initialObservation = apartment.observation ?? '';
+  const hasChanges = (status !== initialStatus) || (observation.trim() !== initialObservation.trim());
+
+  // Close on outside click or ESC
+  useEffect(() => {
+    if (!open) return;
+    function onDown(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if ((e as any).key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey as any);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey as any);
+    };
+  }, [open]);
 
   const save = async () => {
     setError(null);
@@ -453,8 +488,12 @@ function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpda
       const payload: any = { status: (status || 'Available') as string };
       if (observation?.trim()) payload.observation = observation.trim();
       await updateBachelorPadStatus(apartment.id, payload);
-      setOpen(false);
-      onUpdated();
+      setJustSaved(true);
+      setTimeout(() => {
+        setJustSaved(false);
+        setOpen(false);
+        onUpdated();
+      }, 900);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to update');
     } finally {
@@ -463,7 +502,7 @@ function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpda
   };
 
   return (
-    <div className="status-editor">
+    <div className="status-editor" ref={containerRef}>
       <button
         type="button"
         className="status-fab"
@@ -499,10 +538,14 @@ function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpda
             />
           </div>
           {error && <div className="status-popover__error" role="alert">{error}</div>}
-          <div className="status-popover__actions">
-            <button type="button" className="btn" onClick={() => setOpen(false)} disabled={saving}>Cancel</button>
-            <button type="button" className="btn btn--primary" onClick={save} disabled={saving}>Save</button>
+                    <div className="status-popover__actions">
+            <button type="button" className="btn" onClick={() => setOpen(false)} disabled={saving || !hasChanges}>Cancel</button>
+            <button type="button" className="btn btn--primary" onClick={save} disabled={saving || !hasChanges}>
+              {saving ? <span className="btn-spinner" aria-hidden="true" /> : null}
+              {saving ? "Saving…" : "Save"}
+            </button>
           </div>
+          {justSaved && <div className="saved-indicator" aria-live="polite">Saved ?</div>}
         </div>
       )}
     </div>
@@ -510,6 +553,30 @@ function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpda
 }
 
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
