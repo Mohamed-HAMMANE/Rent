@@ -19,6 +19,7 @@ app.MapGet("/bachelorpad", async () =>
         SELECT 
             Id,
             Link,
+            Status,
             Address,
             Price,
             Quality,
@@ -40,16 +41,17 @@ app.MapGet("/bachelorpad", async () =>
             Id: id,
             ImageUrl: $"/bachelorpad/{id}/image",
             Link: rd.GetString(1),
-            Address: rd.IsDBNull(2) ? null : rd.GetString(2),
-            Price: rd.GetInt32(3),
-            Quality: rd.GetInt32(4),
-            Location: rd.GetInt32(5),
-            Aesthetics: rd.GetInt32(6),
-            Furniture: rd.GetInt32(7),
-            Phone: rd.IsDBNull(8) ? null : rd.GetString(8),
-            Observation: rd.IsDBNull(9) ? null : rd.GetString(9),
-            ChatLink: rd.IsDBNull(10) ? null : rd.GetString(10),
-            Mark: Convert.ToDecimal(rd.GetValue(11))
+            Status: rd.GetString(2),
+            Address: rd.IsDBNull(3) ? null : rd.GetString(3),
+            Price: rd.GetInt32(4),
+            Quality: rd.GetInt32(5),
+            Location: rd.GetInt32(6),
+            Aesthetics: rd.GetInt32(7),
+            Furniture: rd.GetInt32(8),
+            Phone: rd.IsDBNull(9) ? null : rd.GetString(9),
+            Observation: rd.IsDBNull(10) ? null : rd.GetString(10),
+            ChatLink: rd.IsDBNull(11) ? null : rd.GetString(11),
+            Mark: Convert.ToDecimal(rd.GetValue(12))
         ));
     }
 
@@ -68,7 +70,6 @@ app.MapGet("/bachelorpad/{id:int}/image", async (int id) =>
 
     return Results.File(bytes, "image/jpeg");
 });
-
 
 app.MapPut("/bachelorpad/{id:int}", async (int id, BachelorPadUpdateDto dto) =>
 {
@@ -110,13 +111,45 @@ app.MapPut("/bachelorpad/{id:int}", async (int id, BachelorPadUpdateDto dto) =>
     return affected == 1 ? Results.NoContent() : Results.NotFound();
 });
 
+app.MapPatch("/bachelorpad/{id:int}/status", async (int id, StatusChangeDto dto) =>
+{
+    var allowedStatuses = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Available","Reserved","NoResponse","NoShow","Unreliable","NotInterested","Closed" };
+    if (string.IsNullOrWhiteSpace(dto.Status) || !allowedStatuses.Contains(dto.Status))
+        return Results.BadRequest("Invalid status.");
+
+    await using var con = new SqlConnection(cs);
+    await con.OpenAsync();
+
+    const string sql = @"
+        UPDATE BachelorPad
+        SET Status = @Status,
+            Observation = @Observation
+        WHERE Id = @Id;";
+
+    await using var cmd = new SqlCommand(sql, con);
+    cmd.Parameters.AddWithValue("@Id", id);
+    cmd.Parameters.AddWithValue("@Status", dto.Status);
+
+    var pObs = cmd.Parameters.Add("@Observation", System.Data.SqlDbType.NVarChar, -1);
+    pObs.Value = (object?)dto.Observation ?? DBNull.Value;
+
+    var affected = await cmd.ExecuteNonQueryAsync();
+    return affected == 1 ? Results.NoContent() : Results.NotFound();
+});
+
+
+
 app.Run();
+
+
+internal sealed record StatusChangeDto(string Status, string? Observation);
 
 internal record BachelorPadDto(
     int Id,
     string ImageUrl,
     string Link,
     string? Address,
+    string Status,
     int Price,
     int Quality,
     int Location,
@@ -130,6 +163,7 @@ internal record BachelorPadDto(
 
 internal sealed record BachelorPadUpdateDto(
     int Price,
+    string Status,
     int Quality,
     int Location,
     int Aesthetics,
