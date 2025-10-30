@@ -1,9 +1,27 @@
 import { useMemo, useRef, useCallback, useState } from 'react';
 import type { ReactNode, KeyboardEvent, ChangeEvent } from 'react';
 import './App.css';
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, updateBachelorPadStatus } from './api';
 import { useBachelorPads } from './hooks/useBachelorPads';
-import type { BachelorPad } from './types';
+import type { BachelorPad, ApartmentStatus } from './types';
+const STATUS_OPTIONS: ApartmentStatus[] = [
+  'Available',
+  'Reserved',
+  'NoResponse',
+  'NoShow',
+  'Unreliable',
+  'NotInterested',
+  'Closed',
+];
+const STATUS_DESCRIPTIONS: Record<ApartmentStatus, string> = {
+  Available: "Still open, landlord responsive.",
+  Reserved: "You or someone else temporarily booked it.",
+  NoResponse: "Landlord not answering calls/messages.",
+  NoShow: "Landlord missed scheduled visit.",
+  Unreliable: "Inconsistent communication or false info.",
+  NotInterested: "You personally ruled it out.",
+  Closed: "Already rented or removed from market.",
+};
 
 type RatingMetric = 'quality' | 'location' | 'aesthetics' | 'furniture';
 
@@ -85,6 +103,9 @@ type SortField =
   | 'quality'
   | 'recent';
 
+type StatusFilter = 'all' | ApartmentStatus;
+
+
 export const SORT_OPTIONS: Array<{ value: SortField; label: string }> = [
   { value: 'mark-desc', label: 'Mark (high → low)' },
   { value: 'mark-asc', label: 'Mark (low → high)' },
@@ -148,21 +169,35 @@ function analyseNote(note: string | null) {
 }
 
 function App() {
-  const { apartments, loading, error } = useBachelorPads();
+  const { apartments, loading, error, refresh } = useBachelorPads();
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const [sortField, setSortField] = useState<SortField>('mark-desc');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('Available');
 
-  const hasDistinctAddresses = useMemo(() => {
-    const values = new Set(
-      apartments
-        .map((item) => (item.address ?? '').trim().toLowerCase())
-        .filter(Boolean)
-    );
-    return values.size > 1;
+  const filteredApartments = useMemo(() => {
+    if (statusFilter === 'all') return apartments;
+    return apartments.filter((a) => (a.status ?? 'Available') === statusFilter);
+  }, [apartments, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<ApartmentStatus, number> = {
+      Available: 0,
+      Reserved: 0,
+      NoResponse: 0,
+      NoShow: 0,
+      Unreliable: 0,
+      NotInterested: 0,
+      Closed: 0,
+    };
+    for (const a of apartments) {
+      const s = (a.status ?? 'Available') as ApartmentStatus;
+      counts[s] += 1;
+    }
+    return { all: apartments.length, ...counts } as Record<StatusFilter, number>;
   }, [apartments]);
 
-  const sortedApartments = useMemo(() => {
-    return [...apartments].sort((a, b) => {
+    const sortedApartments = useMemo(() => {
+    return [...filteredApartments].sort((a, b) => {
       switch (sortField) {
         case 'mark-asc': {
           const aMark = typeof a.mark === 'number' ? a.mark : Infinity;
@@ -185,7 +220,7 @@ function App() {
         }
       }
     });
-  }, [apartments, sortField]);
+  }, [filteredApartments, sortField]);
 
   const summary = useMemo(() => {
     if (sortedApartments.length === 0) {
@@ -249,7 +284,19 @@ function App() {
                   {option.label}
                 </option>
               ))}
-            </select>
+                          </select>
+              <label className="list-controls__label" htmlFor="status-filter">Status</label>
+              <select
+                id="status-filter"
+                className="list-controls__select"
+                value={statusFilter}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as StatusFilter)}
+              >
+                <option value="all" title="All statuses">All ({statusCounts.all})</option>
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s} title={STATUS_DESCRIPTIONS[s]}>{s} ({statusCounts[s]})</option>
+                ))}
+              </select>
           </div>
         </div>
         <div className="page-header__right">
@@ -286,9 +333,7 @@ function App() {
             typeof apartment.observation === 'string' &&
             /visit/i.test(apartment.observation);
           const note = analyseNote(apartment.observation);
-          const displayName = hasDistinctAddresses
-            ? apartment.address || 'Address TBD'
-            : `Pad #${apartment.id}`;
+          const displayName = apartment.address || "Address TBD";
           return (
             <article
               key={apartment.id}
@@ -302,10 +347,7 @@ function App() {
               }}
               onKeyDown={(event) => handleKeyNavigation(event, index)}
             >
-              {hasVisitScheduled && (
-                <span className="visit-indicator" aria-label="Visit scheduled" />
-              )}
-              <div className="apartment-card__top">
+                            <div className="apartment-card__top">
                 <div className="apartment-thumb">
                   <a
                     className="thumb-link"
@@ -369,7 +411,9 @@ function App() {
                 className="apartment-actions"
                 role="group"
                 aria-label="Quick actions"
-              />
+              >
+                <StatusEditor apartment={apartment} onUpdated={refresh} />
+              </div>
               {note && (
                 <div
                   className={`apartment-note apartment-note--${note.tone}`}
@@ -394,7 +438,105 @@ function App() {
   );
 }
 
+
+function StatusEditor({ apartment, onUpdated }: { apartment: BachelorPad; onUpdated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<ApartmentStatus>(apartment.status ?? 'Available');
+  const [observation, setObservation] = useState<string>(apartment.observation ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    setError(null);
+    setSaving(true);
+    try {
+      const payload: any = { status: (status || 'Available') as string };
+      if (observation?.trim()) payload.observation = observation.trim();
+      await updateBachelorPadStatus(apartment.id, payload);
+      setOpen(false);
+      onUpdated();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="status-editor">
+      <button
+        type="button"
+        className="status-fab"
+        title="Edit status"
+        aria-label="Edit status"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <svg viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M11.2 2.3 13.7 4.8 6.1 12.4 3.5 12.6 3.7 10 11.2 2.3Z" fill="currentColor" />
+        </svg>
+      </button>
+      {open && (
+        <div className="status-popover" role="dialog" aria-label="Update status">
+          <div className="status-popover__row">
+            <select
+              aria-label="Status"
+              className="status-popover__select"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as ApartmentStatus)}
+            >
+                            {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt} title={STATUS_DESCRIPTIONS[opt]}>{opt}</option>
+              ))}
+                          </select></div>
+          <div className="status-popover__row">
+            <textarea
+              aria-label="Observation"
+              className="status-popover__textarea"
+              rows={3}
+              placeholder="Observation (optional)"
+              value={observation}
+              onChange={(e) => setObservation(e.target.value)}
+            />
+          </div>
+          {error && <div className="status-popover__error" role="alert">{error}</div>}
+          <div className="status-popover__actions">
+            <button type="button" className="btn" onClick={() => setOpen(false)} disabled={saving}>Cancel</button>
+            <button type="button" className="btn btn--primary" onClick={save} disabled={saving}>Save</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

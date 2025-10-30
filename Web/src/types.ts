@@ -1,3 +1,12 @@
+export type ApartmentStatus =
+  | "Available"
+  | "Reserved"
+  | "NoResponse"
+  | "NoShow"
+  | "Unreliable"
+  | "NotInterested"
+  | "Closed";
+
 export interface BachelorPad {
   id: number;
   imageUrl: string;
@@ -12,4 +21,5 @@ export interface BachelorPad {
   observation: string | null;
   chatLink: string | null;
   mark: number;
+  status?: ApartmentStatus | null;
 }
